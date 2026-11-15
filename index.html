@@ -1,0 +1,1479 @@
+<!doctype html>
+<html lang="pt-BR"><head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<style>html,body{margin:0}</style>
+</head><body>
+<div id="faixa-demo" style="position:sticky;top:0;z-index:60;background:#1A1A1A;color:#F5F0E8;font:500 13px/1.4 Inter,system-ui,sans-serif;padding:8px 16px;display:flex;gap:12px;align-items:center;justify-content:center;flex-wrap:wrap;text-align:center">
+<span>Versão de demonstração — conteúdos de exemplo. O que você aprovar aqui fica só neste aparelho.</span>
+<button type="button" onclick="try{localStorage.removeItem('medora-demo')}catch(e){};location.reload()" style="font:inherit;background:transparent;color:#C9A84C;border:1px solid #C9A84C;border-radius:6px;padding:3px 10px;cursor:pointer">Recomeçar</button>
+</div>
+<title>MEDORA OS</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Inter:wght@400;500;600&display=swap">
+<style>
+/* Layout: consultório de alto padrão — coluna de navegação discreta à esquerda (desktop) / barra inferior (celular), conteúdo em cartões creme e branco com fios dourados.
+   Identidade fixa da marca (design-guide.md): tema único claro — a marca proíbe fundos escuros. */
+:root {
+  color-scheme: light;
+  --creme: #F5F0E8;
+  --creme-2: #EDE5D7;
+  --branco: #FFFFFF;
+  --carvao: #1A1A1A;
+  --texto-2: #5E574C;
+  --texto-3: #8A8173;
+  --dourado: #C9A84C;
+  --dourado-escuro: #8F6E22;
+  --dourado-claro: #F3EAD3;
+  --fio: #E3D8C3;
+  --ok: #4E7A57;
+  --ok-fundo: #E7EFE5;
+  --alerta: #A86A12;
+  --alerta-fundo: #F7ECD7;
+  --bloqueio: #A23E2C;
+  --bloqueio-fundo: #F6E3DE;
+  --sombra: 0 1px 2px rgba(60, 45, 15, .05), 0 8px 24px rgba(60, 45, 15, .06);
+  --f-titulo: "Lora", Georgia, "Times New Roman", serif;
+  --f-texto: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+  --raio: 10px;
+  --raio-p: 6px;
+}
+* { box-sizing: border-box; }
+html, body { height: 100%; }
+body {
+  background: var(--creme);
+  color: var(--carvao);
+  font-family: var(--f-texto);
+  font-size: 16px;
+  line-height: 1.55;
+  font-weight: 400;
+  -webkit-font-smoothing: antialiased;
+}
+body::before {
+  content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px);
+  z-index: 10; background: var(--creme);
+}
+a { color: var(--dourado-escuro); }
+button { font: inherit; color: inherit; cursor: pointer; }
+button:focus-visible, a:focus-visible, textarea:focus-visible, input:focus-visible, summary:focus-visible {
+  outline: 2px solid var(--dourado); outline-offset: 2px;
+}
+h1, h2, h3 { font-family: var(--f-titulo); font-weight: 500; text-wrap: balance; margin: 0; line-height: 1.15; }
+h1 { font-size: clamp(26px, 4.5vw, 34px); letter-spacing: -.01em; }
+h2 { font-size: 22px; }
+h3 { font-size: 18px; }
+p { margin: 0; }
+.rotulo {
+  font-size: 12px; letter-spacing: .06em; text-transform: uppercase;
+  color: var(--texto-3); font-weight: 500;
+}
+.num { font-variant-numeric: tabular-nums; }
+
+/* ---------- Estrutura ---------- */
+.app { display: grid; grid-template-columns: 1fr; min-height: 100%; }
+.lateral { display: none; }
+.topo {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5;
+  background: color-mix(in srgb, var(--creme) 92%, transparent);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--fio);
+  padding-block: 10px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: flex; align-items: center; gap: 12px;
+}
+.topo img { width: 30px; height: auto; }
+.marca-nome { font-family: var(--f-titulo); font-size: 20px; letter-spacing: .08em; }
+.marca-nome small { font-family: var(--f-texto); font-size: 12px; letter-spacing: .08em; color: var(--texto-3); margin-left: 6px; }
+.topo .fase { margin-left: auto; }
+main {
+  padding-block: 24px 110px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  max-width: 1080px; width: 100%; margin: 0 auto;
+  min-width: 0;
+}
+.abas {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 6;
+  background: var(--branco);
+  border-top: 1px solid var(--fio);
+  display: grid; grid-template-columns: repeat(5, 1fr);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  padding-left: env(safe-area-inset-left, 0px);
+  padding-right: env(safe-area-inset-right, 0px);
+}
+.aba {
+  background: none; border: 0; padding: 10px 2px 9px;
+  display: flex; flex-direction: column; align-items: center; gap: 3px;
+  font-size: 12px; letter-spacing: .04em; color: var(--texto-3); position: relative;
+}
+.aba svg { width: 22px; height: 22px; stroke: currentColor; fill: none; stroke-width: 1.4; }
+.aba[aria-current="page"] { color: var(--dourado-escuro); }
+.aba[aria-current="page"]::before {
+  content: ""; position: absolute; top: 0; left: 30%; right: 30%; height: 2px; background: var(--dourado);
+}
+.contador {
+  position: absolute; top: 5px; left: calc(50% + 8px);
+  min-width: 17px; height: 17px; padding: 0 5px; border-radius: 9px;
+  background: var(--dourado); color: var(--carvao); font-size: 12px; font-weight: 600;
+  display: grid; place-items: center;
+}
+.contador[hidden] { display: none !important; }
+
+@media (min-width: 900px) {
+  .app { grid-template-columns: 248px 1fr; }
+  .topo, .abas { display: none; }
+  .lateral {
+    display: flex; flex-direction: column; gap: 28px;
+    position: sticky; top: 0; height: 100vh;
+    background: var(--branco); border-right: 1px solid var(--fio);
+    padding: 32px 20px 24px;
+  }
+  .lateral .assinatura { width: 170px; margin: 0 auto; display: block; }
+  .lateral nav { display: flex; flex-direction: column; gap: 2px; }
+  .lateral .aba {
+    flex-direction: row; justify-content: flex-start; gap: 12px;
+    font-size: 14px; letter-spacing: .02em; padding: 10px 12px; border-radius: var(--raio-p);
+    color: var(--texto-2);
+  }
+  .lateral .aba:hover { background: var(--creme); }
+  .lateral .aba[aria-current="page"] { background: var(--dourado-claro); color: var(--carvao); }
+  .lateral .aba[aria-current="page"]::before { display: none; }
+  .lateral .contador { position: static; margin-left: auto; }
+  .lateral .rodape { margin-top: auto; font-size: 12px; color: var(--texto-3); line-height: 1.5; }
+  main { padding-block: 40px 64px; padding-left: max(40px, env(safe-area-inset-left, 0px)); padding-right: max(40px, env(safe-area-inset-right, 0px)); }
+}
+
+/* ---------- Componentes ---------- */
+.cabecalho { display: flex; flex-direction: column; gap: 6px; margin-bottom: 24px; }
+.cabecalho p { color: var(--texto-2); max-width: 60ch; }
+.secao { display: flex; flex-direction: column; gap: 14px; margin-top: 32px; }
+.secao > header { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.cartao {
+  background: var(--branco); border: 1px solid var(--fio); border-radius: var(--raio);
+  padding: 18px; box-shadow: var(--sombra); min-width: 0;
+}
+.selo {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 12px; letter-spacing: .06em; text-transform: uppercase; font-weight: 500;
+  padding: 4px 10px; border-radius: 999px; border: 1px solid var(--fio);
+  background: var(--branco); color: var(--texto-2); white-space: nowrap;
+}
+.selo::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: currentColor; opacity: .8; }
+.selo.ouro { border-color: var(--dourado); color: var(--dourado-escuro); background: var(--dourado-claro); }
+.selo.ok { color: var(--ok); background: var(--ok-fundo); border-color: transparent; }
+.selo.alerta { color: var(--alerta); background: var(--alerta-fundo); border-color: transparent; }
+.selo.bloqueio { color: var(--bloqueio); background: var(--bloqueio-fundo); border-color: transparent; }
+.selo.neutro::before { display: none; }
+.exemplo-tag {
+  font-size: 12px; letter-spacing: .06em; text-transform: uppercase; font-weight: 600;
+  color: var(--texto-3); border: 1px dashed var(--texto-3); padding: 2px 7px; border-radius: 4px;
+}
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 11px 20px; border-radius: var(--raio-p); border: 1px solid var(--dourado);
+  background: transparent; color: var(--carvao); font-weight: 500; letter-spacing: .03em;
+  min-height: 44px; transition: background .15s;
+}
+.btn:hover { background: var(--dourado-claro); }
+.btn.primario { background: var(--dourado); }
+.btn.primario:hover { background: #BE9C3F; }
+.btn.discreto { border-color: var(--fio); color: var(--texto-2); }
+.btn:disabled { opacity: .5; cursor: default; }
+.btn svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 1.6; }
+.faixa {
+  display: flex; gap: 14px; align-items: flex-start;
+  border: 1px solid var(--dourado); background: var(--dourado-claro);
+  border-radius: var(--raio); padding: 14px 16px;
+}
+.faixa svg { flex: none; width: 22px; height: 22px; stroke: var(--dourado-escuro); fill: none; stroke-width: 1.5; margin-top: 1px; }
+.faixa p { color: var(--texto-2); font-size: 14px; }
+.faixa strong { color: var(--carvao); font-weight: 500; }
+.vazio {
+  text-align: center; padding: 40px 20px; color: var(--texto-2);
+  border: 1px dashed var(--fio); border-radius: var(--raio); background: color-mix(in srgb, var(--branco) 50%, transparent);
+}
+.vazio h3 { margin-bottom: 6px; color: var(--carvao); }
+.aviso-carregando { font-size: 13px; color: var(--texto-3); margin-bottom: 12px; }
+
+/* ---------- Início ---------- */
+.saudacao { font-family: var(--f-titulo); font-style: italic; color: var(--dourado-escuro); font-size: 20px; }
+.blocos { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+@media (min-width: 700px) { .blocos { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.bloco {
+  background: var(--branco); border: 1px solid var(--fio); border-radius: var(--raio);
+  padding: 16px; display: flex; flex-direction: column; gap: 6px; text-align: left;
+  min-width: 0;
+}
+button.bloco:hover { border-color: var(--dourado); }
+.bloco .valor { font-family: var(--f-titulo); font-size: 34px; line-height: 1; font-weight: 500; }
+.bloco .valor.pequeno { font-size: 24px; line-height: 1.15; }
+.bloco .desc { font-size: 13px; color: var(--texto-2); }
+.bloco.destaque { border-color: var(--dourado); background: linear-gradient(180deg, var(--dourado-claro), var(--branco) 70%); }
+.duas-col { display: grid; grid-template-columns: 1fr; gap: 16px; }
+@media (min-width: 820px) { .duas-col { grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); } }
+.semana { display: flex; flex-direction: column; }
+.semana-dia {
+  display: grid; grid-template-columns: 52px minmax(0, 1fr) auto; gap: 12px; align-items: center;
+  padding: 12px 0; border-top: 1px solid var(--fio);
+}
+.semana-dia:first-child { border-top: 0; padding-top: 0; }
+.semana-dia .dia { font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--texto-3); }
+.semana-dia .tarefa { font-weight: 500; }
+.semana-dia .tarefa span { display: block; font-weight: 400; font-size: 13px; color: var(--texto-2); }
+.semana-dia .tempo { font-size: 13px; color: var(--dourado-escuro); white-space: nowrap; }
+.orcamento { display: flex; flex-direction: column; gap: 10px; }
+.barra-tempo { display: flex; height: 10px; border-radius: 5px; overflow: hidden; background: var(--creme-2); }
+.barra-tempo span { display: block; height: 100%; }
+.legenda-tempo { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 13px; color: var(--texto-2); }
+.legenda-tempo i { display: inline-block; width: 9px; height: 9px; border-radius: 2px; margin-right: 6px; vertical-align: 0; }
+.norte { display: flex; flex-direction: column; gap: 10px; }
+.norte .formula { font-family: var(--f-titulo); font-size: 19px; color: var(--texto-2); }
+.norte-grafico { height: 70px; border-radius: var(--raio-p); background:
+  repeating-linear-gradient(90deg, transparent 0 calc(100% / 12 - 1px), var(--fio) calc(100% / 12 - 1px) calc(100% / 12));
+  border-bottom: 1px solid var(--fio); display: grid; place-items: center; font-size: 13px; color: var(--texto-3); }
+
+/* ---------- Aprovação ---------- */
+.lista { display: flex; flex-direction: column; gap: 18px; }
+.peca { display: grid; grid-template-columns: 1fr; gap: 18px; }
+@media (min-width: 760px) { .peca { grid-template-columns: 200px minmax(0, 1fr); } }
+.previa {
+  position: relative; width: 100%; max-width: 200px; aspect-ratio: 9 / 16; margin: 0 auto;
+  border-radius: 14px; overflow: hidden; border: 1px solid var(--fio);
+  background:
+    radial-gradient(120% 70% at 50% 30%, #E9DCC4 0%, #CDB896 55%, #9C8461 100%);
+  display: flex; flex-direction: column; justify-content: flex-end; align-items: center;
+  padding: 14px 12px 34px;
+}
+.previa.carrossel { aspect-ratio: 4 / 5; background: var(--creme); border-color: var(--dourado); justify-content: center; padding: 18px; }
+.previa .silhueta { position: absolute; left: 50%; top: 22%; transform: translateX(-50%); width: 46%; aspect-ratio: 1; border-radius: 50%; background: rgba(255,255,255,.28); }
+.previa .silhueta::after { content: ""; position: absolute; left: -35%; right: -35%; top: 105%; height: 140%; border-radius: 50% 50% 0 0; background: rgba(255,255,255,.22); }
+.previa .leg {
+  position: relative; text-align: center; font-family: var(--f-texto); font-weight: 600;
+  font-size: 14px; line-height: 1.25; color: #FFFFFF; text-shadow: 0 1px 3px rgba(0,0,0,.45);
+}
+.previa .leg b { color: var(--dourado-claro); background: rgba(26,26,26,.38); padding: 0 4px; border-radius: 3px; font-weight: 600; }
+.previa .marca-agua { position: absolute; top: 10px; right: 10px; width: 22px; opacity: .85; }
+.previa .tipo { position: absolute; top: 10px; left: 10px; font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: #FFFFFF; background: rgba(26,26,26,.35); padding: 2px 6px; border-radius: 3px; }
+.previa.carrossel .tipo { color: var(--dourado-escuro); background: var(--dourado-claro); }
+.previa .slide-titulo { font-family: var(--f-titulo); font-size: 22px; line-height: 1.1; text-align: center; color: var(--carvao); }
+.previa .slide-sub { margin-top: 10px; font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--dourado-escuro); text-align: center; }
+.previa .pontos { position: absolute; bottom: 10px; left: 0; right: 0; display: flex; justify-content: center; gap: 4px; }
+.previa .pontos i { width: 5px; height: 5px; border-radius: 50%; background: var(--fio); }
+.previa .pontos i:first-child { background: var(--dourado); }
+.previa-nota { font-size: 12px; color: var(--texto-3); text-align: center; margin-top: 8px; }
+.peca-corpo { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.peca-topo { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.gancho { font-family: var(--f-titulo); font-size: 19px; line-height: 1.25; color: var(--carvao); border-left: 2px solid var(--dourado); padding-left: 14px; }
+.meta { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px 18px; }
+.meta div { min-width: 0; }
+.meta dd { margin: 2px 0 0; font-size: 14px; }
+.meta dt { font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--texto-3); }
+details.dobra { border-top: 1px solid var(--fio); padding-top: 10px; }
+details.dobra summary {
+  cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center;
+  font-size: 13px; letter-spacing: .06em; text-transform: uppercase; color: var(--texto-2); font-weight: 500;
+  min-height: 32px;
+}
+details.dobra summary::-webkit-details-marker { display: none; }
+details.dobra summary::after { content: "+"; font-family: var(--f-titulo); font-size: 22px; color: var(--dourado-escuro); }
+details.dobra[open] summary::after { content: "–"; }
+details.dobra .dobra-corpo { padding: 8px 0 4px; display: flex; flex-direction: column; gap: 10px; }
+.roteiro { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; }
+.roteiro li::marker { color: var(--dourado-escuro); font-family: var(--f-titulo); }
+.texto-legenda { white-space: pre-wrap; background: var(--creme); border-radius: var(--raio-p); padding: 12px 14px; font-size: 14px; }
+.fontes { margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 6px; font-size: 14px; }
+.fontes a { word-break: break-word; }
+.parecer { display: flex; flex-direction: column; gap: 6px; margin: 0; padding: 0; list-style: none; font-size: 14px; }
+.parecer li { display: grid; grid-template-columns: 20px minmax(0, 1fr); gap: 8px; }
+.parecer li svg { width: 18px; height: 18px; fill: none; stroke-width: 1.8; margin-top: 2px; }
+.parecer li.sim svg { stroke: var(--ok); }
+.parecer li.nao svg { stroke: var(--alerta); }
+.acoes { display: flex; flex-wrap: wrap; gap: 10px; padding-top: 4px; }
+.acoes .btn { flex: 1 1 160px; }
+.caixa-ajuste { display: flex; flex-direction: column; gap: 10px; }
+.caixa-ajuste textarea {
+  width: 100%; min-height: 90px; resize: vertical; font: inherit; color: var(--carvao);
+  border: 1px solid var(--fio); border-radius: var(--raio-p); padding: 10px 12px; background: var(--branco);
+}
+.nota-ajuste { background: var(--alerta-fundo); border-radius: var(--raio-p); padding: 10px 12px; font-size: 14px; color: var(--carvao); }
+.nota-ajuste strong { font-weight: 500; }
+.historico { margin: 0; padding: 0; list-style: none; font-size: 13px; color: var(--texto-2); display: flex; flex-direction: column; gap: 4px; }
+.historico b { font-weight: 500; color: var(--carvao); }
+
+/* ---------- Agenda ---------- */
+.agenda { display: flex; flex-direction: column; }
+.agenda-semana { font-family: var(--f-titulo); font-size: 18px; font-style: italic; color: var(--texto-2); margin: 22px 0 6px; }
+.agenda-semana:first-child { margin-top: 0; }
+.agenda-dia { display: grid; grid-template-columns: 60px minmax(0, 1fr); gap: 14px; padding: 12px 0; border-top: 1px solid var(--fio); }
+.agenda-dia .data { display: flex; flex-direction: column; align-items: center; }
+.agenda-dia .data b { font-family: var(--f-titulo); font-size: 30px; font-weight: 500; line-height: 1; }
+.agenda-dia .data span { font-size: 12px; letter-spacing: .06em; text-transform: uppercase; color: var(--texto-3); }
+.agenda-dia.hoje .data b { color: var(--dourado-escuro); }
+.agenda-dia .itens { display: flex; flex-direction: column; gap: 8px; justify-content: center; min-width: 0; }
+.agenda-dia .livre { font-size: 13px; color: var(--texto-3); font-style: italic; }
+.item-agenda {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap; text-align: left;
+  border: 1px solid var(--fio); border-radius: var(--raio-p); background: var(--branco);
+  padding: 10px 12px; width: 100%;
+}
+.item-agenda:hover { border-color: var(--dourado); }
+.item-agenda .t { font-weight: 500; flex: 1 1 200px; min-width: 0; }
+.item-agenda .f { font-size: 12px; color: var(--texto-3); letter-spacing: .08em; text-transform: uppercase; }
+
+/* ---------- Conteúdo ---------- */
+.filtros { display: flex; gap: 8px; flex-wrap: wrap; }
+.chip {
+  border: 1px solid var(--fio); background: var(--branco); border-radius: 999px;
+  padding: 7px 14px; font-size: 13px; color: var(--texto-2); min-height: 36px;
+}
+.chip[aria-pressed="true"] { border-color: var(--dourado); background: var(--dourado-claro); color: var(--carvao); }
+.quadro { display: grid; grid-template-columns: 1fr; gap: 16px; }
+@media (min-width: 760px) { .quadro { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (min-width: 1100px) { .quadro { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+.coluna { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+.coluna > header { display: flex; justify-content: space-between; align-items: baseline; border-bottom: 1px solid var(--dourado); padding-bottom: 6px; }
+.coluna > header h3 { font-size: 20px; }
+.coluna > header span { font-size: 13px; color: var(--texto-3); }
+.mini {
+  text-align: left; background: var(--branco); border: 1px solid var(--fio); border-radius: var(--raio-p);
+  padding: 12px 14px; display: flex; flex-direction: column; gap: 6px; width: 100%;
+}
+.mini:hover { border-color: var(--dourado); }
+.mini .t { font-weight: 500; line-height: 1.35; }
+.mini .s { display: flex; flex-wrap: wrap; gap: 6px 10px; font-size: 12px; color: var(--texto-3); }
+.coluna .nada { font-size: 13px; color: var(--texto-3); font-style: italic; padding: 6px 2px; }
+
+/* ---------- Gravar ---------- */
+.checklist { display: grid; grid-template-columns: 1fr; gap: 10px 24px; margin: 0; padding: 0; list-style: none; }
+@media (min-width: 700px) { .checklist { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.checklist li { display: grid; grid-template-columns: 26px minmax(0, 1fr); gap: 10px; font-size: 14px; }
+.checklist li b { display: block; font-weight: 500; }
+.checklist .n { font-family: var(--f-titulo); font-size: 22px; color: var(--dourado-escuro); line-height: 1; }
+.roteiro-gravar { display: flex; flex-direction: column; gap: 12px; }
+.roteiro-gravar .topo-r { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; align-items: center; }
+
+/* ---------- Painel de detalhe ---------- */
+.veu { position: fixed; inset: 0; z-index: 20; background: rgba(40, 32, 18, .35); display: flex; justify-content: flex-end; }
+.veu[hidden] { display: none !important; }
+.gaveta {
+  background: var(--creme); width: min(620px, 100%); height: 100%; overflow-y: auto;
+  padding-block: calc(20px + env(safe-area-inset-top, 0px)) calc(32px + env(safe-area-inset-bottom, 0px));
+  padding-left: max(20px, env(safe-area-inset-left, 0px));
+  padding-right: max(20px, env(safe-area-inset-right, 0px));
+  box-shadow: -10px 0 40px rgba(40, 32, 18, .15);
+  display: flex; flex-direction: column; gap: 16px;
+}
+.gaveta .fechar { align-self: flex-end; }
+
+/* ---------- Teleprompter ---------- */
+.tp { position: fixed; inset: 0; z-index: 30; background: var(--creme); display: flex; flex-direction: column; }
+.tp[hidden] { display: none !important; }
+.tp-barra {
+  display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+  padding-block: calc(10px + env(safe-area-inset-top, 0px)) 10px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  border-bottom: 1px solid var(--fio); background: var(--branco);
+}
+.tp-barra label { font-size: 13px; color: var(--texto-2); display: flex; align-items: center; gap: 8px; }
+.tp-barra input[type="range"] { accent-color: var(--dourado); width: 110px; }
+.tp-barra .esp { flex: 1; }
+.tp-texto {
+  flex: 1; overflow-y: auto; padding: 35vh max(24px, env(safe-area-inset-right, 0px)) 60vh max(24px, env(safe-area-inset-left, 0px));
+  font-family: var(--f-texto); font-weight: 400; line-height: 1.5; color: var(--carvao);
+  max-width: 900px; width: 100%; margin: 0 auto;
+}
+.tp-texto p { margin-bottom: 1.1em; }
+.tp-guia { position: fixed; left: 0; right: 0; top: 38vh; height: 0; border-top: 1px dashed var(--dourado); pointer-events: none; z-index: 31; }
+.tp[hidden] + .tp-guia, .tp-guia[hidden] { display: none !important; }
+
+.toast {
+  position: fixed; left: 50%; transform: translateX(-50%);
+  bottom: calc(84px + env(safe-area-inset-bottom, 0px)); z-index: 40;
+  background: var(--carvao); color: var(--creme); padding: 10px 18px; border-radius: 999px; font-size: 14px;
+  box-shadow: var(--sombra);
+}
+@media (min-width: 900px) { .toast { bottom: 28px; } }
+.toast[hidden] { display: none !important; }
+@media (prefers-reduced-motion: no-preference) {
+  .gaveta { animation: entra .22s ease-out; }
+  @keyframes entra { from { transform: translateX(24px); opacity: .6; } to { transform: none; opacity: 1; } }
+}
+</style>
+
+<div class="app">
+  <aside class="lateral" aria-label="Navegação">
+    <img class="assinatura" src="logo-painel.png" alt="Dra. Jaqueline Galiza — Médica">
+    <nav id="nav-lateral"></nav>
+    <div class="rodape">
+      <span class="rotulo">MEDORA OS</span><br>
+      Nada é publicado sem a aprovação da Dra. Jaqueline.
+    </div>
+  </aside>
+
+  <div>
+    <header class="topo">
+      <img src="monograma.png" alt="">
+      <span class="marca-nome">MEDORA<small>OS</small></span>
+      <span class="selo ouro fase">Pré-lançamento</span>
+    </header>
+    <main id="conteudo" tabindex="-1"></main>
+  </div>
+</div>
+
+<nav class="abas" id="nav-abas" aria-label="Navegação"></nav>
+
+<div class="veu" id="veu" hidden>
+  <div class="gaveta" id="gaveta" role="dialog" aria-modal="true" aria-label="Detalhes da peça"></div>
+</div>
+
+<div class="tp" id="tp" hidden>
+  <div class="tp-barra">
+    <button class="btn primario" id="tp-play" type="button">Iniciar</button>
+    <label for="tp-vel">Velocidade <input id="tp-vel" type="range" min="10" max="120" value="40"></label>
+    <label for="tp-tam">Tamanho <input id="tp-tam" type="range" min="24" max="64" value="38"></label>
+    <span class="esp"></span>
+    <button class="btn discreto" id="tp-fechar" type="button">Fechar</button>
+  </div>
+  <div class="tp-texto" id="tp-texto"></div>
+</div>
+<div class="tp-guia" id="tp-guia" hidden></div>
+
+<div class="toast" id="toast" role="status" hidden></div>
+
+<script>window.MEDORA_DEMO = [
+  {
+    "id": "analgesico-dor-cabeca",
+    "conformidade": {
+      "itens": [
+        {
+          "ok": true,
+          "texto": "Critérios citados conferem com a ICHD-3 (≥15 dias/mês, uso regular há mais de 3 meses)"
+        },
+        {
+          "ok": true,
+          "texto": "Orienta procurar avaliação e não alterar medicação por conta própria"
+        },
+        {
+          "ok": true,
+          "texto": "Sem alarmismo nem promessa de cura"
+        },
+        {
+          "ok": true,
+          "texto": "Gancho provoca reflexão sem acusar o público"
+        }
+      ],
+      "status": "ok"
+    },
+    "cta": "Envie para alguém que vive com uma cartela de analgésico na bolsa.",
+    "data_prevista": "2026-11-28",
+    "duracao_seg": 50,
+    "exemplo": true,
+    "fontes": [
+      {
+        "nome": "International Classification of Headache Disorders, 3ª edição (ICHD-3) — 8.2 Medication-overuse headache",
+        "url": "https://ichd-3.org/8-headache-attributed-to-a-substance-or-its-withdrawal/8-2-medication-overuse-headache-moh/"
+      }
+    ],
+    "formato": "reels",
+    "gancho": "Você toma remédio para dor de cabeça quase todo dia? Isso pode estar alimentando a própria dor.",
+    "historico": [
+      {
+        "acao": "Preparada pelo sistema",
+        "em": "2026-11-15T15:00:00-03:00",
+        "nota": "",
+        "por": null,
+        "versao": 1
+      }
+    ],
+    "legenda": "Dor de cabeça frequente é muito comum, e o reflexo de tomar um analgésico também.\n\nO que pouca gente sabe: o uso muito frequente de remédios para dor pode manter a dor de cabeça. A classificação internacional das cefaleias reconhece esse quadro.\n\nDor frequente merece avaliação, não só alívio.\n\nConteúdo educativo. Não suspenda nem altere medicamentos sem orientação médica.\n\nDra. Jaqueline Galiza · Médica · CRM-SC [número]",
+    "legenda_tela": "Você toma analgésico *quase todo dia*?",
+    "objetivo": "Alcance com não seguidores e salvamentos",
+    "pilar": "Educação em saúde",
+    "publico": "Adultos que convivem com dor de cabeça frequente",
+    "roteiro": [
+      "Gancho: “Você toma remédio para dor de cabeça quase todo dia? Isso pode estar alimentando a própria dor.”",
+      "Existe um quadro chamado cefaleia por uso excessivo de medicamentos: a dor de cabeça fica mais frequente justamente por causa do uso repetido de analgésicos.",
+      "Pela classificação internacional, ele é considerado quando a dor aparece em 15 dias ou mais por mês e o remédio é usado com frequência há mais de três meses.",
+      "Isso não quer dizer que o remédio é o vilão. Quer dizer que dor frequente merece investigação, e não só alívio.",
+      "Fechamento: “Se você se reconhece aqui, procure uma avaliação médica. Não suspenda nem troque remédios por conta própria.”"
+    ],
+    "serie": "Dor sem mito",
+    "status": "aguardando",
+    "titulo": "Quando o remédio para dor de cabeça mantém a dor",
+    "versao": 1
+  },
+  {
+    "id": "apresentacao",
+    "conformidade": {
+      "itens": [
+        {
+          "ok": true,
+          "texto": "Sem menção a especialidade ou RQE"
+        },
+        {
+          "ok": true,
+          "texto": "Sem promessas ou comparação com colegas"
+        },
+        {
+          "ok": true,
+          "texto": "Sem pacientes, prontuários ou telas no vídeo"
+        },
+        {
+          "ok": false,
+          "texto": "Número do CRM-SC ainda não preenchido na legenda — obrigatório antes de publicar"
+        }
+      ],
+      "status": "alerta"
+    },
+    "cta": "Me conta nos comentários: que dúvida de saúde você nunca teve coragem de perguntar?",
+    "data_prevista": "2026-11-24",
+    "duracao_seg": 45,
+    "exemplo": true,
+    "fontes": [],
+    "formato": "reels",
+    "gancho": "Seis anos estudando para cuidar de pessoas. Agora começa a parte que mais importa.",
+    "historico": [
+      {
+        "acao": "Preparada pelo sistema",
+        "em": "2026-11-15T15:00:00-03:00",
+        "nota": "",
+        "por": null,
+        "versao": 1
+      }
+    ],
+    "legenda": "Seis anos de estudo. Plantões, livros, provas e muita gente que me ensinou pelo caminho.\n\nAgora sou médica e começo a atender aqui na região de Balneário Camboriú e Itajaí, em pronto-socorro e UBS.\n\nNeste perfil, vou explicar saúde de um jeito claro e responsável, sempre com base em ciência, e mostrar um pouco da rotina de quem está começando.\n\nQue dúvida de saúde você nunca teve coragem de perguntar? Me conta aqui embaixo.\n\nDra. Jaqueline Galiza · Médica · CRM-SC [número]",
+    "legenda_tela": "Agora começa a parte *que mais importa*.",
+    "objetivo": "Apresentar quem ela é e criar vínculo com quem chega ao perfil",
+    "pilar": "Bastidores e trajetória",
+    "publico": "Novos seguidores da região de Balneário Camboriú e Itajaí",
+    "roteiro": [
+      "Abertura olhando para a câmera: “Seis anos estudando para cuidar de pessoas. Agora começa a parte que mais importa.”",
+      "Quem eu sou: médica recém-formada, atendendo em pronto-socorro e UBS aqui na região de Balneário Camboriú e Itajaí.",
+      "O que aprendi: que escutar com atenção muda o atendimento tanto quanto saber o protocolo.",
+      "O que você vai encontrar aqui: saúde explicada com clareza, com base em ciência, e um pouco da rotina de quem está começando.",
+      "Fechamento: “Se fizer sentido para você, fica por aqui. E me conta: que dúvida de saúde você nunca teve coragem de perguntar?”"
+    ],
+    "serie": "Apresentação",
+    "status": "aguardando",
+    "titulo": "Prazer, Dra. Jaqueline",
+    "versao": 1
+  },
+  {
+    "id": "caixinha-duvidas",
+    "conformidade": {
+      "itens": [
+        {
+          "ok": true,
+          "texto": "Aviso de que não há orientação individual por mensagem"
+        },
+        {
+          "ok": true,
+          "texto": "Respostas serão gerais, sem identificar quem perguntou"
+        }
+      ],
+      "status": "ok"
+    },
+    "cta": "Responder a caixinha",
+    "data_prevista": "2026-11-25",
+    "exemplo": true,
+    "fontes": [],
+    "formato": "stories",
+    "gancho": "Qual dúvida de saúde você quer ver explicada aqui?",
+    "historico": [
+      {
+        "acao": "Preparada pelo sistema",
+        "em": "2026-11-15T15:00:00-03:00",
+        "nota": "",
+        "por": null,
+        "versao": 1
+      }
+    ],
+    "legenda": "",
+    "objetivo": "Gerar conversa e descobrir pautas reais do público",
+    "pilar": "Relacionamento",
+    "publico": "Seguidores atuais",
+    "roteiro": [
+      "Story 1: foto dela (sem ambiente hospitalar com pacientes) + caixinha de perguntas: “Qual dúvida de saúde você quer ver explicada aqui?”",
+      "Story 2: aviso fixo: “Respondo dúvidas gerais. Não faço orientação individual por mensagem. Em emergência, ligue 192.”"
+    ],
+    "serie": "Pergunta da semana",
+    "status": "aprovado",
+    "titulo": "Caixinha: o que você quer entender sobre saúde?",
+    "versao": 1
+  },
+  {
+    "id": "calor-verao",
+    "exemplo": true,
+    "fontes": [],
+    "formato": "carrossel",
+    "gancho": "",
+    "historico": [],
+    "legenda": "",
+    "objetivo": "Conteúdo sazonal e regional (temporada em BC)",
+    "pilar": "Educação em saúde",
+    "publico": "Moradores e turistas de Balneário Camboriú",
+    "roteiro": [],
+    "serie": "Saúde sem confusão",
+    "status": "pesquisa",
+    "titulo": "Calor do verão no litoral: sinais de que o corpo pede ajuda",
+    "versao": 1
+  },
+  {
+    "id": "diario-residencia",
+    "exemplo": true,
+    "fontes": [],
+    "formato": "reels",
+    "gancho": "",
+    "historico": [],
+    "legenda": "",
+    "objetivo": "Conexão e acompanhamento da trajetória",
+    "pilar": "Bastidores e trajetória",
+    "publico": "Seguidores e estudantes de medicina",
+    "roteiro": [],
+    "serie": "Diário da preparação",
+    "status": "ideia",
+    "titulo": "Diário da preparação para a residência",
+    "versao": 1
+  },
+  {
+    "id": "dor-aguda-cronica",
+    "capa": "Toda dor é igual?",
+    "conformidade": {
+      "itens": [
+        {
+          "ok": true,
+          "texto": "Definição de dor crônica confere com IASP/CID-11"
+        },
+        {
+          "ok": true,
+          "texto": "Não a apresenta como especialista em dor"
+        },
+        {
+          "ok": false,
+          "texto": "Em revisão: frase “não é coisa da idade” — conferir se não soa como crítica a quem já recebeu essa resposta de outro profissional"
+        }
+      ],
+      "status": "alerta"
+    },
+    "cta": "Salve e compartilhe com quem convive com dor.",
+    "data_prevista": "2026-12-01",
+    "exemplo": true,
+    "fontes": [
+      {
+        "nome": "Treede RD et al. Chronic pain as a symptom or a disease: the IASP Classification of Chronic Pain for ICD-11. Pain. 2019;160(1):19-27",
+        "url": "https://pubmed.ncbi.nlm.nih.gov/30586067/"
+      }
+    ],
+    "formato": "carrossel",
+    "gancho": "A dor que avisa e a dor que fica: entender a diferença muda a forma de cuidar.",
+    "historico": [
+      {
+        "acao": "Preparada pelo sistema",
+        "em": "2026-11-15T15:00:00-03:00",
+        "nota": "",
+        "por": null,
+        "versao": 1
+      }
+    ],
+    "legenda": "Nem toda dor funciona do mesmo jeito.\n\nA dor aguda é um alarme. A dor crônica é aquela que persiste por mais de três meses e merece um cuidado próprio.\n\nConviver com dor não deveria ser tratado como normal.\n\nConteúdo educativo. Procure avaliação médica para o seu caso.\n\nDra. Jaqueline Galiza · Médica · CRM-SC [número]",
+    "objetivo": "Salvamentos e autoridade em tema de interesse dela",
+    "pilar": "Educação em saúde",
+    "publico": "Adultos que convivem com dor persistente",
+    "roteiro": [
+      "Capa: Toda dor é igual?",
+      "Dor aguda: um alarme do corpo. Começa de repente e costuma melhorar quando a causa é tratada.",
+      "Dor crônica: dor que persiste ou volta por mais de três meses.",
+      "A dor crônica é reconhecida pela classificação internacional de doenças como uma condição que merece cuidado próprio.",
+      "Sono, estresse e atividade física influenciam a forma como sentimos a dor.",
+      "Dor persistente não é “coisa da idade”. Merece avaliação."
+    ],
+    "serie": "Dor sem mito",
+    "slides": 6,
+    "status": "revisao",
+    "titulo": "Dor aguda e dor crônica não são a mesma coisa",
+    "versao": 1
+  },
+  {
+    "id": "lombar-repouso",
+    "conformidade": {
+      "itens": [
+        {
+          "ok": true,
+          "texto": "Recomendação confere com a diretriz citada"
+        },
+        {
+          "ok": true,
+          "texto": "Inclui sinais de alerta e orientação de procurar atendimento"
+        }
+      ],
+      "status": "ok"
+    },
+    "cta": "Comente qual “mito ou evidência” você quer ver na próxima.",
+    "data_prevista": "2026-12-05",
+    "dica_gravacao": "Pode gravar em pé, com gesto leve de alongamento ao falar de movimento.",
+    "duracao_seg": 45,
+    "exemplo": true,
+    "fontes": [
+      {
+        "nome": "NICE Guideline NG59 — Low back pain and sciatica in over 16s: assessment and management",
+        "url": "https://www.nice.org.uk/guidance/ng59"
+      }
+    ],
+    "formato": "reels",
+    "gancho": "Travou as costas e a primeira ideia é ficar deitado? A evidência aponta outro caminho.",
+    "historico": [
+      {
+        "acao": "Preparada pelo sistema",
+        "em": "2026-11-15T15:00:00-03:00",
+        "nota": "",
+        "por": null,
+        "versao": 1
+      }
+    ],
+    "legenda": "Repouso total na dor nas costas comum: mito ou evidência?\n\nAs diretrizes recomendam se manter ativo dentro do possível. E alguns sinais pedem avaliação imediata.\n\nConteúdo educativo. Procure avaliação para o seu caso.\n\nDra. Jaqueline Galiza · Médica · CRM-SC [número]",
+    "legenda_tela": "Repouso total *ajuda mesmo*?",
+    "objetivo": "Alcance e salvamentos",
+    "pilar": "Educação em saúde",
+    "publico": "Adultos com dor lombar ocasional",
+    "roteiro": [
+      "Gancho: “Travou as costas e a primeira ideia é ficar deitado? A evidência aponta outro caminho.”",
+      "Na dor lombar comum, as diretrizes recomendam manter as atividades do dia a dia dentro do possível, em vez de repouso total na cama.",
+      "Movimento leve e gradual costuma ajudar mais do que ficar parado.",
+      "Mas atenção: febre, perda de força nas pernas, alteração para urinar ou evacuar, ou dor após uma queda forte pedem atendimento.",
+      "Fechamento: “Mito ou evidência? Me conta nos comentários qual tema você quer ver na próxima.”"
+    ],
+    "serie": "Mito ou evidência",
+    "status": "producao",
+    "titulo": "Dor nas costas pede repouso total?",
+    "versao": 1
+  },
+  {
+    "id": "ps-ou-ubs",
+    "capa": "Pronto-socorro ou UBS?",
+    "conformidade": {
+      "itens": [
+        {
+          "ok": true,
+          "texto": "Conteúdo educativo geral, sem orientação individual"
+        },
+        {
+          "ok": true,
+          "texto": "Inclui aviso de emergência (192)"
+        },
+        {
+          "ok": true,
+          "texto": "Fontes oficiais citadas"
+        },
+        {
+          "ok": false,
+          "texto": "Confirmar com a Secretaria de Saúde de BC/Itajaí se a lista de serviços da UBS confere com a realidade local"
+        }
+      ],
+      "status": "alerta"
+    },
+    "cta": "Salve este post e envie para alguém da sua família.",
+    "data_prevista": "2026-11-26",
+    "exemplo": true,
+    "fontes": [
+      {
+        "nome": "Ministério da Saúde — Secretaria de Atenção Primária à Saúde",
+        "url": "https://www.gov.br/saude/pt-br/composicao/saps"
+      },
+      {
+        "nome": "Ministério da Saúde — SAMU 192",
+        "url": "https://www.gov.br/saude/pt-br/composicao/saes/samu-192"
+      }
+    ],
+    "formato": "carrossel",
+    "gancho": "Você sabe onde ir quando sente algo? A escolha certa faz você ser atendido mais rápido.",
+    "historico": [
+      {
+        "acao": "Preparada pelo sistema",
+        "em": "2026-11-15T15:00:00-03:00",
+        "nota": "",
+        "por": null,
+        "versao": 1
+      }
+    ],
+    "legenda": "Trabalho em pronto-socorro e em UBS, e vejo todo dia como essa dúvida é comum.\n\nCada serviço tem um papel. Saber qual procurar ajuda você a ser atendido no lugar certo e deixa o pronto-socorro livre para quem está em situação grave.\n\nSalve para consultar quando precisar.\n\nEste conteúdo é educativo e não substitui avaliação médica. Em emergência, ligue 192.\n\nDra. Jaqueline Galiza · Médica · CRM-SC [número]",
+    "objetivo": "Gerar salvamentos e compartilhamentos com informação útil no dia a dia",
+    "pilar": "Educação em saúde",
+    "publico": "Moradores da região que usam o SUS",
+    "roteiro": [
+      "Capa: Pronto-socorro ou UBS? Saber onde ir faz diferença.",
+      "UBS: consultas de rotina, acompanhamento de pressão alta e diabetes, vacinas, curativos, pré-natal e renovação de receitas.",
+      "Pronto-socorro e UPA: situações urgentes que não podem esperar uma consulta agendada.",
+      "SAMU 192: emergência no local, quando a pessoa não pode ou não deve se deslocar.",
+      "Por que importa: quando casos de rotina vão ao pronto-socorro, todo mundo espera mais, inclusive quem está grave.",
+      "Na dúvida diante de um sinal de gravidade, procure o atendimento de urgência. Não espere.",
+      "Salve para consultar depois e envie para alguém da sua família."
+    ],
+    "serie": "Saúde sem confusão",
+    "slides": 7,
+    "status": "aguardando",
+    "titulo": "Pronto-socorro ou UBS? Onde procurar atendimento",
+    "versao": 1
+  },
+  {
+    "id": "samu-192",
+    "conformidade": {
+      "itens": [
+        {
+          "ok": true,
+          "texto": "Lista de sinais de alerta é geral e educativa"
+        },
+        {
+          "ok": true,
+          "texto": "Sem cenas reais de atendimento"
+        }
+      ],
+      "status": "ok"
+    },
+    "cta": "Salve e envie para o grupo da família.",
+    "data_prevista": "2026-12-03",
+    "dica_gravacao": "Gravar em ambiente neutro (não dentro do pronto-socorro). Tom calmo, sem dramatizar.",
+    "duracao_seg": 40,
+    "exemplo": true,
+    "fontes": [
+      {
+        "nome": "Ministério da Saúde — SAMU 192",
+        "url": "https://www.gov.br/saude/pt-br/composicao/saes/samu-192"
+      }
+    ],
+    "formato": "reels",
+    "gancho": "Tem situação em que você não deve ir de carro ao hospital. Você sabe quais são?",
+    "historico": [
+      {
+        "acao": "Preparada pelo sistema",
+        "em": "2026-11-15T15:00:00-03:00",
+        "nota": "",
+        "por": null,
+        "versao": 1
+      }
+    ],
+    "legenda": "Em algumas situações, a ajuda precisa chegar até você.\n\nSalve este vídeo e compartilhe com sua família.\n\nEm emergência: 192.\n\nDra. Jaqueline Galiza · Médica · CRM-SC [número]",
+    "legenda_tela": "Quando *ligar para o 192*",
+    "objetivo": "Utilidade pública, compartilhamentos",
+    "pilar": "Educação em saúde",
+    "publico": "Famílias da região",
+    "roteiro": [
+      "Gancho: “Tem situação em que você não deve ir de carro ao hospital. Você sabe quais são?”",
+      "Ligue 192 diante de: dor no peito forte ou que não passa, sinais de AVC (boca torta, fraqueza de um lado, fala enrolada), falta de ar intensa, desmaio, convulsão e acidentes graves.",
+      "Na ligação: diga o endereço com ponto de referência, o que aconteceu e se a pessoa está acordada e respirando.",
+      "Mantenha o telefone livre: a equipe pode retornar a ligação.",
+      "Fechamento: “Salve este vídeo. Em uma emergência, cada minuto conta.”"
+    ],
+    "serie": "Saúde sem confusão",
+    "status": "producao",
+    "titulo": "Quando ligar para o 192",
+    "versao": 1
+  }
+];</script>
+<script>
+(() => {
+  "use strict";
+
+  /* ---------- Dicionários ---------- */
+  const ICONES = {
+    inicio: '<svg viewBox="0 0 24 24"><path d="M4 10.5 12 4l8 6.5V20a1 1 0 0 1-1 1h-5v-6h-4v6H5a1 1 0 0 1-1-1z"/></svg>',
+    aprovar: '<svg viewBox="0 0 24 24"><path d="M12 21s-7-4.5-7-10.5A4.5 4.5 0 0 1 12 7a4.5 4.5 0 0 1 7 3.5C19 16.5 12 21 12 21z"/><path d="m9 12 2 2 4-4"/></svg>',
+    agenda: '<svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="16" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg>',
+    conteudo: '<svg viewBox="0 0 24 24"><rect x="4" y="4" width="7" height="7" rx="1"/><rect x="13" y="4" width="7" height="7" rx="1"/><rect x="4" y="13" width="7" height="7" rx="1"/><rect x="13" y="13" width="7" height="7" rx="1"/></svg>',
+    gravar: '<svg viewBox="0 0 24 24"><rect x="7" y="3" width="10" height="18" rx="2"/><circle cx="12" cy="11" r="2.5"/><path d="M11 18h2"/></svg>',
+    check: '<svg viewBox="0 0 24 24"><path d="m5 12 4.5 4.5L19 7"/></svg>',
+    atencao: '<svg viewBox="0 0 24 24"><path d="M12 8v5M12 16.5v.5"/><circle cx="12" cy="12" r="9"/></svg>',
+    escudo: '<svg viewBox="0 0 24 24"><path d="M12 3 5 6v5c0 4.5 3 8.5 7 10 4-1.5 7-5.5 7-10V6z"/><path d="m9 12 2 2 4-4"/></svg>'
+  };
+  const ABAS = [
+    { id: "inicio", nome: "Início" },
+    { id: "aprovar", nome: "Aprovar" },
+    { id: "agenda", nome: "Agenda" },
+    { id: "conteudo", nome: "Conteúdo" },
+    { id: "gravar", nome: "Gravar" }
+  ];
+  const STATUS = {
+    ideia:      { nome: "Ideia",                classe: "neutro" },
+    pesquisa:   { nome: "Pesquisada",           classe: "neutro" },
+    producao:   { nome: "Em produção",          classe: "" },
+    revisao:    { nome: "Em revisão ética",     classe: "" },
+    aguardando: { nome: "Aguardando aprovação", classe: "ouro" },
+    ajustes:    { nome: "Ajustes pedidos",      classe: "alerta" },
+    aprovado:   { nome: "Aprovado",             classe: "ok" },
+    agendado:   { nome: "Agendado",             classe: "ok" },
+    publicado:  { nome: "Publicado",            classe: "ok" },
+    arquivado:  { nome: "Arquivado",            classe: "neutro" }
+  };
+  const COLUNAS = [
+    { nome: "Ideias", status: ["ideia", "pesquisa"] },
+    { nome: "Em produção", status: ["producao", "revisao", "ajustes"] },
+    { nome: "Com a Dra.", status: ["aguardando"] },
+    { nome: "Prontas", status: ["aprovado", "agendado"] },
+    { nome: "No ar", status: ["publicado"] }
+  ];
+  const FORMATOS = { reels: "Reels", carrossel: "Carrossel", stories: "Stories", post: "Post" };
+  const PILARES = ["Educação em saúde", "Bastidores e trajetória", "Valores e visão", "Relacionamento"];
+  const DIAS = ["dom", "seg", "ter", "qua", "qui", "sex", "sáb"];
+  const MESES = ["jan", "fev", "mar", "abr", "mai", "jun", "jul", "ago", "set", "out", "nov", "dez"];
+
+  /* ---------- Estado ---------- */
+  const estado = {
+    pecas: [],
+    carregado: false,
+    lento: false,
+    semDados: false,
+    erro: "",
+    podeEscrever: true,
+    meuId: null,
+    nomes: {},
+    filtroPilar: "",
+    ajusteAberto: "",
+    gavetaId: ""
+  };
+  let db = null, userApi = null;
+
+  /* ---------- Utilidades ---------- */
+  const $ = (s, r = document) => r.querySelector(s);
+  const esc = (v) => String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+  const hojeISO = () => { const d = new Date(); return iso(d); };
+  const iso = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
+  const dataLocal = (s) => { if (!s) return null; const [a, m, d] = s.split("-").map(Number); return new Date(a, m - 1, d); };
+  const dataCurta = (s) => { const d = dataLocal(s); return d ? `${DIAS[d.getDay()]}, ${d.getDate()} ${MESES[d.getMonth()]}` : "sem data"; };
+  const quando = (s) => {
+    try { const d = new Date(s); return `${d.getDate()} ${MESES[d.getMonth()]}, ${String(d.getHours()).padStart(2, "0")}:${String(d.getMinutes()).padStart(2, "0")}`; }
+    catch { return ""; }
+  };
+  const selo = (st) => { const s = STATUS[st] || { nome: st, classe: "neutro" }; return `<span class="selo ${s.classe}">${esc(s.nome)}</span>`; };
+  const nomePessoa = (id) => !id ? "Sistema MEDORA" : (estado.nomes[id] || (id === estado.meuId ? "Você" : "Alguém da equipe"));
+  function toast(msg) {
+    const t = $("#toast"); t.textContent = msg; t.hidden = false;
+    clearTimeout(toast._t); toast._t = setTimeout(() => { t.hidden = true; }, 2600);
+  }
+  const porStatus = (...lst) => estado.pecas.filter((p) => lst.includes(p.status));
+  const ordenadasPorData = (arr) => [...arr].sort((a, b) => String(a.data_prevista || "9999").localeCompare(String(b.data_prevista || "9999")));
+
+  /* ---------- Navegação ---------- */
+  function rotaAtual() {
+    const h = (location.hash || "").replace("#", "");
+    return ABAS.some((a) => a.id === h) ? h : "inicio";
+  }
+  function desenharNav() {
+    const pend = porStatus("aguardando").length;
+    const gravar = porStatus("producao").length;
+    const rota = rotaAtual();
+    const html = ABAS.map((a) => {
+      const n = a.id === "aprovar" ? pend : a.id === "gravar" ? gravar : 0;
+      return `<button class="aba" type="button" data-ir="${a.id}" ${rota === a.id ? 'aria-current="page"' : ""}>
+        ${ICONES[a.id]}<span>${a.nome}</span>
+        <span class="contador num" ${n ? "" : "hidden"}>${n}</span>
+      </button>`;
+    }).join("");
+    $("#nav-abas").innerHTML = html;
+    $("#nav-lateral").innerHTML = html;
+  }
+  document.addEventListener("click", (e) => {
+    const ir = e.target.closest("[data-ir]");
+    if (ir) { e.preventDefault(); location.hash = ir.dataset.ir; return; }
+    const abrir = e.target.closest("[data-abrir]");
+    if (abrir) { abrirGaveta(abrir.dataset.abrir); return; }
+    const acao = e.target.closest("[data-acao]");
+    if (acao) { tratarAcao(acao.dataset.acao, acao.dataset.id, acao); }
+  });
+  window.addEventListener("hashchange", () => { render(); window.scrollTo(0, 0); });
+
+  /* ---------- Telas ---------- */
+  function avisoCarregamento() {
+    if (estado.erro) return `<p class="aviso-carregando">${esc(estado.erro)}</p>`;
+    if (!estado.carregado && estado.lento) return `<p class="aviso-carregando">Os dados estão demorando para chegar. Verifique a conexão; a página atualiza sozinha quando eles chegarem.</p>`;
+    if (!estado.carregado && !estado.semDados) return `<p class="aviso-carregando">Carregando peças…</p>`;
+    return "";
+  }
+  function telaVaziaGeral() {
+    if (estado.semDados) return `<div class="vazio"><h3>Painel sem acesso aos dados</h3><p>Abra este painel pelo link do claude.ai com a sua conta para ver e aprovar as peças.</p></div>`;
+    return `<div class="vazio"><h3>Nenhuma peça ainda</h3><p>Quando o sistema preparar as primeiras pautas e vídeos, elas aparecem aqui.</p></div>`;
+  }
+
+  function saudacao() {
+    const h = new Date().getHours();
+    return h < 12 ? "Bom dia" : h < 18 ? "Boa tarde" : "Boa noite";
+  }
+
+  function telaInicio() {
+    const pend = porStatus("aguardando");
+    const gravar = porStatus("producao");
+    const prontas = ordenadasPorData(porStatus("aprovado", "agendado"));
+    const futuras = ordenadasPorData(estado.pecas.filter((p) => p.data_prevista && p.data_prevista >= hojeISO() && !["arquivado", "publicado", "ideia", "pesquisa"].includes(p.status)));
+    const proxima = futuras[0];
+    const exemplo = estado.pecas.some((p) => p.exemplo);
+    return `
+      <div class="cabecalho">
+        <span class="saudacao">${saudacao()}, Dra. Jaqueline</span>
+        <h1>Sua presença, com calma e constância.</h1>
+        <p>O que precisa de você esta semana, o que está pronto e como o perfil está evoluindo.</p>
+      </div>
+      ${avisoCarregamento()}
+      <div class="faixa">
+        ${ICONES.escudo}
+        <p><strong>Pré-lançamento.</strong> As publicações começam quando o CRM-SC estiver ativo. Até lá, o sistema prepara o banco de conteúdo e nada vai ao ar.${exemplo ? " As peças marcadas como <em>exemplo</em> servem para testar o fluxo." : ""}</p>
+      </div>
+
+      <section class="secao" aria-label="Resumo">
+        <div class="blocos">
+          <button class="bloco destaque" type="button" data-ir="aprovar">
+            <span class="rotulo">Para aprovar</span>
+            <span class="valor num">${pend.length}</span>
+            <span class="desc">${pend.length === 1 ? "peça esperando você" : "peças esperando você"}</span>
+          </button>
+          <button class="bloco" type="button" data-ir="gravar">
+            <span class="rotulo">Para gravar</span>
+            <span class="valor num">${gravar.length}</span>
+            <span class="desc">roteiros prontos</span>
+          </button>
+          <button class="bloco" type="button" data-ir="conteudo">
+            <span class="rotulo">Banco pronto</span>
+            <span class="valor num">${prontas.length}</span>
+            <span class="desc">aprovadas, aguardando a data</span>
+          </button>
+          <button class="bloco" type="button" data-ir="agenda">
+            <span class="rotulo">Próxima publicação</span>
+            <span class="valor pequeno">${proxima ? esc(dataCurta(proxima.data_prevista)) : "—"}</span>
+            <span class="desc">${proxima ? esc(proxima.titulo) : "nada agendado"}</span>
+          </button>
+        </div>
+      </section>
+
+      <div class="duas-col secao">
+        <section class="cartao" aria-labelledby="t-ritmo">
+          <header style="margin-bottom:14px"><span class="rotulo">Ritmo da semana</span><h3 id="t-ritmo">Duas horas, bem usadas</h3></header>
+          <div class="semana">
+            <div class="semana-dia"><span class="dia">seg</span><span class="tarefa">Relatório da semana<span>O sistema mostra o que funcionou e propõe as pautas.</span></span><span class="tempo">sistema</span></div>
+            <div class="semana-dia"><span class="dia">qui</span><span class="tarefa">Sessão de gravação<span>4 a 6 vídeos curtos, com roteiro e teleprompter.</span></span><span class="tempo num">70 min</span></div>
+            <div class="semana-dia"><span class="dia">sex</span><span class="tarefa">Sessão de aprovação<span>Assistir, aprovar ou pedir ajuste pelo celular.</span></span><span class="tempo num">40 min</span></div>
+          </div>
+          <div class="orcamento" style="margin-top:16px">
+            <div class="barra-tempo" role="img" aria-label="70 minutos de gravação, 40 de aprovação e 10 de folga, de 120 minutos">
+              <span style="width:58.3%;background:var(--dourado)"></span>
+              <span style="width:33.3%;background:var(--dourado-escuro)"></span>
+              <span style="width:8.4%;background:var(--fio)"></span>
+            </div>
+            <div class="legenda-tempo">
+              <span><i style="background:var(--dourado)"></i>Gravação 70 min</span>
+              <span><i style="background:var(--dourado-escuro)"></i>Aprovação 40 min</span>
+              <span><i style="background:var(--fio)"></i>Folga 10 min</span>
+            </div>
+          </div>
+        </section>
+        <section class="cartao norte" aria-labelledby="t-norte">
+          <span class="rotulo">Métrica principal</span>
+          <h3 id="t-norte">Ações de valor por semana</h3>
+          <p class="formula">salvamentos + compartilhamentos + novos seguidores vindos de quem ainda não seguia</p>
+          <div class="norte-grafico">Começa a ser medida no lançamento</div>
+          <p style="font-size:13px;color:var(--texto-2)">As duas primeiras semanas no ar formam a linha de base. As metas de crescimento são definidas a partir dela.</p>
+        </section>
+      </div>
+    `;
+  }
+
+  function previa(p) {
+    const legenda = p.legenda_tela || p.gancho || "";
+    if (p.formato === "carrossel" || p.formato === "post") {
+      return `<div>
+        <div class="previa carrossel">
+          <span class="tipo">${esc(FORMATOS[p.formato] || "")}</span>
+          <img class="marca-agua" src="monograma.png" alt="">
+          <div class="slide-titulo">${esc(p.capa || p.titulo)}</div>
+          <div class="slide-sub">Dra. Jaqueline Galiza</div>
+          <div class="pontos">${"<i></i>".repeat(Math.min(p.slides || 5, 8))}</div>
+        </div>
+        <p class="previa-nota">${p.slides ? esc(p.slides) + " slides · " : ""}prévia da capa</p>
+      </div>`;
+    }
+    const partes = String(legenda).split("*");
+    const leg = partes.map((t, i) => (i % 2 ? `<b>${esc(t)}</b>` : esc(t))).join("");
+    return `<div>
+      <div class="previa">
+        <span class="tipo">${esc(FORMATOS[p.formato] || "Vídeo")}${p.duracao_seg ? " · " + esc(p.duracao_seg) + "s" : ""}</span>
+        <img class="marca-agua" src="monograma.png" alt="">
+        <div class="silhueta"></div>
+        <div class="leg">${leg}</div>
+      </div>
+      <p class="previa-nota">${p.video_url ? "" : "o vídeo editado aparece aqui · estilo da legenda"}</p>
+    </div>`;
+  }
+
+  function blocoParecer(p) {
+    const c = p.conformidade || {};
+    const itens = (c.itens || []).map((i) => `<li class="${i.ok ? "sim" : "nao"}">${i.ok ? ICONES.check : ICONES.atencao}<span>${esc(i.texto)}</span></li>`).join("");
+    const cls = c.status === "ok" ? "ok" : c.status === "bloqueio" ? "bloqueio" : "alerta";
+    const nome = c.status === "ok" ? "Sem pendências" : c.status === "bloqueio" ? "Bloqueada" : "Com pontos de atenção";
+    return `<details class="dobra" ${c.status && c.status !== "ok" ? "open" : ""}>
+      <summary>Revisão ética e CFM</summary>
+      <div class="dobra-corpo"><span class="selo ${cls}">${nome}</span><ul class="parecer">${itens}</ul></div>
+    </details>`;
+  }
+
+  function fichaCompleta(p, { comAcoes }) {
+    const roteiro = (p.roteiro || []).map((r) => `<li>${esc(r)}</li>`).join("");
+    const fontes = (p.fontes || []).map((f) => `<li>${f.url ? `<a href="${esc(f.url)}" target="_blank" rel="noopener">${esc(f.nome)}</a>` : esc(f.nome)}</li>`).join("");
+    const hist = (p.historico || []).slice().reverse().map((h) => `<li><b>${esc(h.acao)}</b> · ${esc(nomePessoa(h.por))} · ${esc(quando(h.em))}${h.nota ? ` — “${esc(h.nota)}”` : ""}</li>`).join("");
+    const ajusteAberto = estado.ajusteAberto === p.id;
+    let acoes = "";
+    if (comAcoes && estado.podeEscrever) {
+      if (p.status === "aguardando") {
+        acoes = ajusteAberto
+          ? `<div class="caixa-ajuste">
+              <label class="rotulo" for="aj-${esc(p.id)}">O que precisa mudar?</label>
+              <textarea id="aj-${esc(p.id)}" placeholder="Ex.: trocar o gancho, regravar o trecho final, tirar a palavra “sempre”…"></textarea>
+              <div class="acoes">
+                <button class="btn primario" type="button" data-acao="enviar-ajuste" data-id="${esc(p.id)}">Enviar pedido de ajuste</button>
+                <button class="btn discreto" type="button" data-acao="cancelar-ajuste" data-id="${esc(p.id)}">Cancelar</button>
+              </div>
+            </div>`
+          : `<div class="acoes">
+              <button class="btn primario" type="button" data-acao="aprovar" data-id="${esc(p.id)}" ${p.conformidade?.status === "bloqueio" ? "disabled" : ""}>${ICONES.check} Aprovar publicação</button>
+              <button class="btn" type="button" data-acao="abrir-ajuste" data-id="${esc(p.id)}">Pedir ajuste</button>
+            </div>`;
+      } else if (p.status === "aprovado" || p.status === "agendado") {
+        acoes = `<div class="acoes"><button class="btn discreto" type="button" data-acao="revogar" data-id="${esc(p.id)}">Retirar aprovação</button></div>`;
+      }
+    }
+    return `
+      <div class="peca-topo">
+        ${selo(p.status)}
+        <span class="selo neutro">${esc(FORMATOS[p.formato] || p.formato || "")}</span>
+        ${p.exemplo ? '<span class="exemplo-tag">exemplo</span>' : ""}
+      </div>
+      <h3>${esc(p.titulo)}</h3>
+      ${p.gancho ? `<p class="gancho">${esc(p.gancho)}</p>` : ""}
+      ${p.status === "ajustes" && p.ajuste_nota ? `<p class="nota-ajuste"><strong>Ajuste pedido:</strong> ${esc(p.ajuste_nota)}</p>` : ""}
+      <dl class="meta">
+        <div><dt>Pilar</dt><dd>${esc(p.pilar || "—")}</dd></div>
+        <div><dt>Objetivo</dt><dd>${esc(p.objetivo || "—")}</dd></div>
+        <div><dt>Para quem</dt><dd>${esc(p.publico || "—")}</dd></div>
+        <div><dt>Data prevista</dt><dd>${esc(dataCurta(p.data_prevista))}</dd></div>
+      </dl>
+      ${roteiro ? `<details class="dobra"><summary>${p.formato === "carrossel" ? "Slides" : "Roteiro"}</summary><div class="dobra-corpo"><ol class="roteiro">${roteiro}</ol></div></details>` : ""}
+      ${p.legenda ? `<details class="dobra"><summary>Legenda do post</summary><div class="dobra-corpo"><p class="texto-legenda">${esc(p.legenda)}</p></div></details>` : ""}
+      ${fontes ? `<details class="dobra"><summary>Fontes</summary><div class="dobra-corpo"><ul class="fontes">${fontes}</ul></div></details>` : ""}
+      ${p.conformidade ? blocoParecer(p) : ""}
+      ${hist ? `<details class="dobra"><summary>Histórico</summary><div class="dobra-corpo"><ul class="historico">${hist}</ul></div></details>` : ""}
+      ${acoes}
+      ${comAcoes && !estado.podeEscrever && p.status === "aguardando" ? '<p class="aviso-carregando">Você está com acesso de leitura. Para aprovar, peça acesso de edição ao dono do painel.</p>' : ""}
+    `;
+  }
+
+  function telaAprovar() {
+    const pend = ordenadasPorData(porStatus("aguardando"));
+    const ajustes = ordenadasPorData(porStatus("ajustes"));
+    const lista = pend.map((p) => `
+      <article class="cartao peca" id="peca-${esc(p.id)}">
+        ${previa(p)}
+        <div class="peca-corpo">${fichaCompleta(p, { comAcoes: true })}</div>
+      </article>`).join("");
+    const listaAj = ajustes.map((p) => `
+      <button class="mini" type="button" data-abrir="${esc(p.id)}">
+        <span class="t">${esc(p.titulo)}</span>
+        <span class="s"><span>${esc(FORMATOS[p.formato] || "")}</span><span>${esc(p.ajuste_nota || "")}</span></span>
+      </button>`).join("");
+    return `
+      <div class="cabecalho">
+        <span class="rotulo">Sessão de aprovação</span>
+        <h1>Para você aprovar</h1>
+        <p>Assista, leia a legenda e confira a revisão ética. Só vai ao ar o que você aprovar aqui. O que ficar sem resposta não é publicado.</p>
+      </div>
+      ${avisoCarregamento()}
+      ${estado.pecas.length === 0 && estado.carregado ? telaVaziaGeral() : ""}
+      ${estado.semDados ? telaVaziaGeral() : ""}
+      ${estado.carregado && pend.length === 0 && estado.pecas.length ? `<div class="vazio"><h3>Tudo em dia</h3><p>Nenhuma peça esperando por você agora.</p></div>` : ""}
+      <div class="lista">${lista}</div>
+      ${ajustes.length ? `<section class="secao"><header><h2>Voltando com ajustes</h2><span class="rotulo">${ajustes.length}</span></header><div class="lista" style="gap:10px">${listaAj}</div></section>` : ""}
+    `;
+  }
+
+  function telaAgenda() {
+    const inicio = new Date(); inicio.setHours(0, 0, 0, 0);
+    const dow = (inicio.getDay() + 6) % 7; // segunda = 0
+    inicio.setDate(inicio.getDate() - dow);
+    const porDia = {};
+    estado.pecas.forEach((p) => { if (p.data_prevista && p.status !== "arquivado") (porDia[p.data_prevista] ||= []).push(p); });
+    const hoje = hojeISO();
+    let html = "";
+    for (let s = 0; s < 3; s++) {
+      const ini = new Date(inicio); ini.setDate(inicio.getDate() + s * 7);
+      const fim = new Date(ini); fim.setDate(ini.getDate() + 6);
+      html += `<h3 class="agenda-semana">${s === 0 ? "Esta semana" : s === 1 ? "Próxima semana" : "Daqui a duas semanas"} · ${ini.getDate()} ${MESES[ini.getMonth()]} – ${fim.getDate()} ${MESES[fim.getMonth()]}</h3>`;
+      for (let d = 0; d < 7; d++) {
+        const dia = new Date(ini); dia.setDate(ini.getDate() + d);
+        const k = iso(dia);
+        const itens = (porDia[k] || []).map((p) => `
+          <button class="item-agenda" type="button" data-abrir="${esc(p.id)}">
+            <span class="f">${esc(FORMATOS[p.formato] || "")}</span>
+            <span class="t">${esc(p.titulo)}</span>
+            ${selo(p.status)}
+          </button>`).join("");
+        html += `<div class="agenda-dia ${k === hoje ? "hoje" : ""}">
+          <div class="data"><b class="num">${dia.getDate()}</b><span>${DIAS[dia.getDay()]}</span></div>
+          <div class="itens">${itens || '<span class="livre">livre</span>'}</div>
+        </div>`;
+      }
+    }
+    const semData = estado.pecas.filter((p) => !p.data_prevista && !["ideia", "pesquisa", "arquivado", "publicado"].includes(p.status));
+    return `
+      <div class="cabecalho">
+        <span class="rotulo">Calendário editorial</span>
+        <h1>Agenda de publicações</h1>
+        <p>Três publicações por semana no feed como ponto de partida. A frequência e os horários serão ajustados com os dados reais do perfil.</p>
+      </div>
+      ${avisoCarregamento()}
+      <div class="cartao"><div class="agenda">${html}</div></div>
+      ${semData.length ? `<section class="secao"><header><h2>Sem data definida</h2></header><div class="lista" style="gap:10px">${semData.map((p) => `<button class="mini" type="button" data-abrir="${esc(p.id)}"><span class="t">${esc(p.titulo)}</span><span class="s">${selo(p.status)}</span></button>`).join("")}</div></section>` : ""}
+    `;
+  }
+
+  function telaConteudo() {
+    const filtradas = estado.pecas.filter((p) => !estado.filtroPilar || p.pilar === estado.filtroPilar);
+    const chips = [`<button class="chip" type="button" data-acao="filtro" data-id="" aria-pressed="${!estado.filtroPilar}">Todos os pilares</button>`]
+      .concat(PILARES.map((n) => `<button class="chip" type="button" data-acao="filtro" data-id="${esc(n)}" aria-pressed="${estado.filtroPilar === n}">${esc(n)}</button>`)).join("");
+    const colunas = COLUNAS.map((c) => {
+      const itens = ordenadasPorData(filtradas.filter((p) => c.status.includes(p.status)));
+      return `<section class="coluna">
+        <header><h3>${esc(c.nome)}</h3><span class="num">${itens.length}</span></header>
+        ${itens.map((p) => `<button class="mini" type="button" data-abrir="${esc(p.id)}">
+          <span class="t">${esc(p.titulo)}</span>
+          <span class="s"><span>${esc(FORMATOS[p.formato] || "")}</span><span>${esc(p.pilar || "")}</span>${p.data_prevista ? `<span>${esc(dataCurta(p.data_prevista))}</span>` : ""}</span>
+          <span>${selo(p.status)}</span>
+        </button>`).join("") || '<p class="nada">Nada aqui.</p>'}
+      </section>`;
+    }).join("");
+    return `
+      <div class="cabecalho">
+        <span class="rotulo">Banco de conteúdo</span>
+        <h1>Da ideia ao ar</h1>
+        <p>Cada peça passa por pesquisa com fonte, produção, revisão ética e a sua aprovação antes de ser agendada.</p>
+      </div>
+      ${avisoCarregamento()}
+      <div class="filtros" role="group" aria-label="Filtrar por pilar">${chips}</div>
+      <div class="quadro secao">${colunas}</div>
+    `;
+  }
+
+  function telaGravar() {
+    const fila = ordenadasPorData(porStatus("producao"));
+    const cartoes = fila.map((p) => `
+      <article class="cartao roteiro-gravar">
+        <div class="topo-r">
+          <div class="peca-topo"><span class="selo neutro">${esc(FORMATOS[p.formato] || "")}</span>${p.duracao_seg ? `<span class="selo neutro">até ${esc(p.duracao_seg)}s</span>` : ""}${p.exemplo ? '<span class="exemplo-tag">exemplo</span>' : ""}</div>
+          <button class="btn primario" type="button" data-acao="teleprompter" data-id="${esc(p.id)}">Abrir teleprompter</button>
+        </div>
+        <h3>${esc(p.titulo)}</h3>
+        ${p.gancho ? `<p class="gancho">${esc(p.gancho)}</p>` : ""}
+        <ol class="roteiro">${(p.roteiro || []).map((r) => `<li>${esc(r)}</li>`).join("")}</ol>
+        ${p.dica_gravacao ? `<p class="aviso-carregando" style="margin:0">${esc(p.dica_gravacao)}</p>` : ""}
+      </article>`).join("");
+    return `
+      <div class="cabecalho">
+        <span class="rotulo">Sessão de gravação</span>
+        <h1>Roteiros para gravar</h1>
+        <p>Grave todos de uma vez, sem se preocupar com erros: o sistema corta pausas e repetições na edição. Depois, é só colocar os arquivos na pasta de entrada.</p>
+      </div>
+      ${avisoCarregamento()}
+      <section class="cartao" aria-labelledby="t-check">
+        <span class="rotulo">Antes de começar</span>
+        <h3 id="t-check" style="margin:4px 0 14px">Checklist rápido</h3>
+        <ul class="checklist">
+          <li><span class="n">1</span><span><b>Celular na vertical</b>Câmera traseira, na altura dos olhos, a um braço de distância.</span></li>
+          <li><span class="n">2</span><span><b>Luz de frente</b>Janela ou luz suave à sua frente, nunca atrás.</span></li>
+          <li><span class="n">3</span><span><b>Lugar silencioso</b>Sem ar-condicionado barulhento; microfone de lapela se tiver.</span></li>
+          <li><span class="n">4</span><span><b>Sem pacientes ou telas</b>Nada de prontuários, monitores, crachás de terceiros ou pacientes ao fundo.</span></li>
+          <li><span class="n">5</span><span><b>Um vídeo por arquivo</b>Comece cada roteiro com 2 segundos de silêncio e olhe para a câmera.</span></li>
+          <li><span class="n">6</span><span><b>Errou? Continue</b>Repita a frase e siga. O corte é feito na edição.</span></li>
+        </ul>
+      </section>
+      <section class="secao">
+        <header><h2>Fila desta sessão</h2><span class="rotulo">${fila.length} ${fila.length === 1 ? "roteiro" : "roteiros"}</span></header>
+        ${fila.length ? `<div class="lista">${cartoes}</div>` : estado.carregado ? `<div class="vazio"><h3>Nenhum roteiro na fila</h3><p>Os roteiros aprovados para gravação aparecem aqui antes de cada sessão.</p></div>` : ""}
+      </section>
+    `;
+  }
+
+  /* ---------- Gaveta de detalhe ---------- */
+  function abrirGaveta(id) {
+    estado.gavetaId = id;
+    desenharGaveta();
+    $("#veu").hidden = false;
+    document.body.style.overflow = "hidden";
+    setTimeout(() => $("#gaveta .fechar")?.focus(), 30);
+  }
+  function fecharGaveta() {
+    estado.gavetaId = ""; estado.ajusteAberto = "";
+    $("#veu").hidden = true; document.body.style.overflow = "";
+  }
+  function desenharGaveta() {
+    const p = estado.pecas.find((x) => x.id === estado.gavetaId);
+    if (!p) { fecharGaveta(); return; }
+    $("#gaveta").innerHTML = `
+      <button class="btn discreto fechar" type="button" data-acao="fechar">Fechar</button>
+      ${previa(p)}
+      <div class="peca-corpo">${fichaCompleta(p, { comAcoes: true })}</div>`;
+  }
+  $("#veu").addEventListener("click", (e) => { if (e.target.id === "veu") fecharGaveta(); });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") { if (!$("#tp").hidden) fecharTp(); else if (!$("#veu").hidden) fecharGaveta(); }
+  });
+
+  /* ---------- Ações ---------- */
+  async function gravarStatus(p, novo, acao, nota) {
+    if (estado.demo) {
+      p.historico = [...(p.historico || []), { acao, por: "demo", em: new Date().toISOString(), nota: nota || "", versao: p.versao || 1 }];
+      p.status = novo; if (novo === "ajustes") p.ajuste_nota = nota;
+      try { localStorage.setItem("medora-demo", JSON.stringify(estado.pecas)); } catch {}
+      redesenhar(); return true;
+    }
+    if (!db) { toast("Sem conexão com os dados."); return false; }
+    const historico = (p.historico || []).map((h) => ({ ...h }));
+    historico.push({ acao, por: estado.meuId, em: new Date().toISOString(), nota: nota || "", versao: p.versao || 1 });
+    const corpo = { status: novo, historico };
+    if (novo === "ajustes") corpo.ajuste_nota = nota;
+    try {
+      await db.doc("pecas/" + p.id).update(corpo);
+      return true;
+    } catch (e) {
+      if (e && e.code === "invalid_argument") { estado.podeEscrever = false; render(); toast("Seu acesso é só de leitura."); }
+      else toast("Não foi possível salvar. Tente de novo em instantes.");
+      return false;
+    }
+  }
+  async function tratarAcao(acao, id, el) {
+    const p = estado.pecas.find((x) => x.id === id);
+    if (acao === "fechar") { fecharGaveta(); return; }
+    if (acao === "filtro") { estado.filtroPilar = id; render(); return; }
+    if (acao === "teleprompter") { abrirTp(p); return; }
+    if (!p) return;
+    if (acao === "abrir-ajuste") { estado.ajusteAberto = id; redesenhar(); setTimeout(() => document.getElementById("aj-" + id)?.focus(), 30); return; }
+    if (acao === "cancelar-ajuste") { estado.ajusteAberto = ""; redesenhar(); return; }
+    el.disabled = true;
+    if (acao === "aprovar") {
+      if (await gravarStatus(p, "aprovado", "Aprovado")) toast("Aprovado. A peça entra na agenda.");
+    } else if (acao === "enviar-ajuste") {
+      const nota = (document.getElementById("aj-" + id)?.value || "").trim();
+      if (!nota) { el.disabled = false; toast("Escreva o que precisa mudar."); return; }
+      if (await gravarStatus(p, "ajustes", "Ajuste pedido", nota)) { estado.ajusteAberto = ""; toast("Pedido de ajuste enviado."); }
+    } else if (acao === "revogar") {
+      if (await gravarStatus(p, "aguardando", "Aprovação retirada")) toast("Aprovação retirada. A peça voltou para a fila.");
+    }
+    el.disabled = false;
+  }
+  function redesenhar() {
+    const rascunhos = {};
+    document.querySelectorAll("textarea[id^='aj-']").forEach((t) => { rascunhos[t.id] = t.value; });
+    render(); if (estado.gavetaId) desenharGaveta();
+    Object.keys(rascunhos).forEach((k) => { const t = document.getElementById(k); if (t) t.value = rascunhos[k]; });
+  }
+
+  /* ---------- Teleprompter ---------- */
+  let tpRodando = false, tpQuadro = 0, tpUltimo = 0, tpAcumulado = 0;
+  function abrirTp(p) {
+    if (!p) return;
+    const linhas = [p.gancho, ...(p.roteiro || []), p.cta].filter(Boolean);
+    $("#tp-texto").innerHTML = linhas.map((l) => `<p>${esc(l)}</p>`).join("");
+    $("#tp-texto").style.fontSize = $("#tp-tam").value + "px";
+    $("#tp-texto").scrollTop = 0;
+    $("#tp").hidden = false; $("#tp-guia").hidden = false;
+    document.body.style.overflow = "hidden";
+    pararTp();
+    if (navigator.wakeLock) navigator.wakeLock.request("screen").then((w) => { abrirTp.lock = w; }).catch(() => {});
+  }
+  function fecharTp() {
+    pararTp(); $("#tp").hidden = true; $("#tp-guia").hidden = true;
+    if (!estado.gavetaId) document.body.style.overflow = "";
+    try { abrirTp.lock?.release(); } catch {}
+  }
+  function pararTp() { tpRodando = false; cancelAnimationFrame(tpQuadro); $("#tp-play").textContent = "Iniciar"; }
+  function passoTp(t) {
+    if (!tpRodando) return;
+    const dt = tpUltimo ? (t - tpUltimo) / 1000 : 0; tpUltimo = t;
+    const el = $("#tp-texto");
+    tpAcumulado += dt * Number($("#tp-vel").value);
+    if (tpAcumulado >= 1) { const px = Math.floor(tpAcumulado); el.scrollTop += px; tpAcumulado -= px; }
+    if (el.scrollTop + el.clientHeight >= el.scrollHeight - 2) { pararTp(); return; }
+    tpQuadro = requestAnimationFrame(passoTp);
+  }
+  $("#tp-play").addEventListener("click", () => {
+    if (tpRodando) { pararTp(); return; }
+    tpRodando = true; tpUltimo = 0; tpAcumulado = 0; $("#tp-play").textContent = "Pausar";
+    tpQuadro = requestAnimationFrame(passoTp);
+  });
+  $("#tp-fechar").addEventListener("click", fecharTp);
+  $("#tp-tam").addEventListener("input", (e) => { $("#tp-texto").style.fontSize = e.target.value + "px"; });
+
+  /* ---------- Render ---------- */
+  function render() {
+    desenharNav();
+    const r = rotaAtual();
+    const telas = { inicio: telaInicio, aprovar: telaAprovar, agenda: telaAgenda, conteudo: telaConteudo, gravar: telaGravar };
+    const caixa = $("#conteudo");
+    const abertos = new Set([...caixa.querySelectorAll("details[open][data-k]")].map((d) => d.dataset.k));
+    caixa.innerHTML = telas[r]();
+    caixa.querySelectorAll("details.dobra").forEach((d, i) => {
+      const k = r + ":" + i; d.dataset.k = k;
+      if (abertos.has(k)) d.open = true;
+    });
+  }
+
+  /* ---------- Dados ---------- */
+  async function iniciar() {
+    render();
+    const cl = window.claude;
+    if (Array.isArray(window.MEDORA_DEMO)) {
+      let salvas = null;
+      try { salvas = JSON.parse(localStorage.getItem("medora-demo") || "null"); } catch {}
+      estado.demo = true; estado.meuId = "demo"; estado.nomes = { demo: "Você" };
+      estado.pecas = Array.isArray(salvas) && salvas.length ? salvas : window.MEDORA_DEMO.map((p) => ({ ...p }));
+      estado.carregado = true; render(); return;
+    }
+    if (!cl || typeof cl.use !== "function") { estado.semDados = true; render(); return; }
+    try { userApi = await cl.use("user"); } catch { userApi = null; }
+    if (userApi) {
+      try {
+        estado.meuId = await userApi.id();
+        const pode = await userApi.can("data.write");
+        if (pode === false) estado.podeEscrever = false;
+      } catch {}
+    }
+    try { db = await cl.use("db"); } catch { db = null; }
+    if (!db) { estado.semDados = true; render(); return; }
+    const timer = setTimeout(() => { if (!estado.carregado) { estado.lento = true; render(); } }, 10000);
+    db.collection("pecas").onSnapshot(async (snap) => {
+      estado.pecas = snap.docs.filter((d) => d.exists).map((d) => ({ id: d.id, ...d.data() }));
+      if (!snap.metadata.fromCache) { estado.carregado = true; estado.lento = false; clearTimeout(timer); }
+      else if (snap.size) estado.carregado = true;
+      await resolverNomes();
+      redesenhar();
+    }, (e) => {
+      clearTimeout(timer);
+      estado.erro = e && e.code === "revoked" ? "O acesso a este painel mudou. Recarregue a página." : "Não foi possível carregar as peças agora.";
+      estado.carregado = true; render();
+    });
+  }
+  async function resolverNomes() {
+    if (!userApi) return;
+    const ids = new Set();
+    estado.pecas.forEach((p) => (p.historico || []).forEach((h) => h.por && ids.add(h.por)));
+    if (!ids.size) return;
+    try {
+      const ps = await userApi.profiles([...ids]);
+      const nomes = {};
+      Object.keys(ps).forEach((k) => { if (ps[k].name) nomes[k] = ps[k].isMe ? ps[k].name + " (você)" : ps[k].name; });
+      estado.nomes = nomes;
+    } catch {}
+  }
+
+  iniciar();
+})();
+</script>
+
+</body></html>
